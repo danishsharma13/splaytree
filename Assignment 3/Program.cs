@@ -734,6 +734,17 @@ class Program
         tree.Print();
         Console.WriteLine();
 
+        Console.WriteLine("\n\nCLONING THE TREE AND COMPARING IT WITH EQUAL METHOD");
+
+        SplayTree<int> clonedTree = (SplayTree<int>)tree.Clone();
+
+        Console.WriteLine("CLONED TREE ORDER: ");
+        clonedTree.Print();
+
+        Console.WriteLine("\n\nThe Cloned tree equals Original Tree? Answer:" + tree.Equals(clonedTree) );
+
+
+
     }
 }
 
