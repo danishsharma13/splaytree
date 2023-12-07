@@ -233,11 +233,11 @@ class SplayTree<T> where T: IComparable<T>
                     {
                         this.root = RotateLeft(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
+                    else if (grandgrandparent.Left != null && grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
                     {
                         grandgrandparent.Left = RotateLeft(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
+                    else if (grandgrandparent.Right != null && grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
                     {
                         grandgrandparent.Right = RotateLeft(grandparent);
                     }
@@ -264,11 +264,11 @@ class SplayTree<T> where T: IComparable<T>
                     {
                         this.root = RotateRight(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
+                    else if (grandgrandparent.Left != null && grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
                     {
                         grandgrandparent.Left = RotateRight(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
+                    else if (grandgrandparent.Right != null &&grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
                     {
                         grandgrandparent.Right = RotateRight(grandparent);
                     }
@@ -308,7 +308,7 @@ class SplayTree<T> where T: IComparable<T>
 
     // Summary: Insert method takes in an item, creates a node and then splays
     //      it inside the tree after adding it into the tree first
-    public void Insert(T item)
+    public bool Insert(T item)
     {
         // Create a new node for it to be stored in the tree
         Node<T>? newNode = new Node<T>(item);
@@ -316,10 +316,10 @@ class SplayTree<T> where T: IComparable<T>
         // If the root is null, then we simply insert the item in the tree
         if (root == null)
         {
-            // Set root to be newNode, previousRoot to be null and return
+            // Set root to be newNode, previousRoot to be null and return true
             this.root = newNode;
             this.previousRoot = null;
-            return;
+            return true;
         }
 
         // Save the current root node for potential undo
@@ -347,12 +347,14 @@ class SplayTree<T> where T: IComparable<T>
         // Lastly Splay the newNode to the top using the access path
         //      This will get the newNode to the root
         Splay(newNode, path);
+
+        return true;
     }
 
     // Summary: Remove method will splay the item to the root, then
     //      splay the left side max node, then removes the item from
     //      the tree
-    public void Remove(T item) 
+    public bool Remove(T item) 
     {
         // Get the access path for the item to remove
         Stack<Node<T>> path = Access(item);
@@ -362,16 +364,12 @@ class SplayTree<T> where T: IComparable<T>
         //      to the root
         if (item.CompareTo(path.Peek().Item) != 0)
         {
-            // Pop the first item from the path as it is the
-            //      last accessed item
-            path.Pop();
-
             // Splay the last accessed item to the root using the
             //      access path
-            Splay(path.Peek(), path);
+            Splay(path.Pop(), path);
 
-            // return as there is no nodes to remove
-            return;
+            // return false as there is no nodes to remove
+            return false;
         }
 
         // Create item to remove node (since the item to remove
@@ -428,6 +426,9 @@ class SplayTree<T> where T: IComparable<T>
         {
             this.root = this.root.Right;
         }
+
+        // Return true as the node is removed
+        return true;
     }
 
     // Summary: Contains method checks if the item is found within the tree
@@ -690,61 +691,55 @@ class Program
 {
     public static void Main(string[] args)
     {
+        // Creating a splay tree object and then inserting some
+        //      numbers in the tree. Test documents have further
+        //      testing screenshots
         SplayTree<int> tree = new SplayTree<int>();
 
         Console.WriteLine("INSERTING 5, 10, 70, 60, 55, 50, 2, 1");
 
-        tree.Insert(5);
-        Console.WriteLine("\nInserted 5: ");
+        Console.WriteLine("\nInserted 5: " + tree.Insert(5));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(10);
-        Console.WriteLine("\nInserted 10: ");
+        Console.WriteLine("\nInserted 10: " + tree.Insert(10));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(70);
-        Console.WriteLine("\nInserted 70: ");
+        Console.WriteLine("\nInserted 70: " + tree.Insert(70));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(60);
-        Console.WriteLine("\nInserted 60: ");
+        Console.WriteLine("\nInserted 60: " + tree.Insert(60));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(55);
-        Console.WriteLine("\nInserted 55: ");
+        Console.WriteLine("\nInserted 55: " + tree.Insert(55));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(50);
-        Console.WriteLine("\nInserted 50: ");
+        Console.WriteLine("\nInserted 50: " + tree.Insert(50));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(2);
-        Console.WriteLine("\nInserted 2: ");
+        Console.WriteLine("\nInserted 2: " + tree.Insert(2));
         tree.Print();
         Console.WriteLine();
 
-        tree.Insert(1);
-        Console.WriteLine("\nInserted 1: ");
+        Console.WriteLine("\nInserted 1: " + tree.Insert(1));
         tree.Print();
         Console.WriteLine();
+/*
+        Console.WriteLine("\n\nREMOVING MULTIPLE NUMBERS FROM THE TREE");
 
-        Console.WriteLine("\n\nCLONING THE TREE AND COMPARING IT WITH EQUAL METHOD");
+        Console.WriteLine("\n\nREMOVE 70? " + tree.Remove(70));
+        tree.Print();
 
-        SplayTree<int> clonedTree = (SplayTree<int>)tree.Clone();
+        Console.WriteLine("\n\nREMOVE 35? " + tree.Remove(35));
+        tree.Print();
 
-        Console.WriteLine("CLONED TREE ORDER: ");
-        clonedTree.Print();
-
-        Console.WriteLine("\n\nThe Cloned tree equals Original Tree? Answer:" + tree.Equals(clonedTree) );
-
-
-
+        Console.WriteLine("\n\nREMOVE 1? " + tree.Remove(1));
+        tree.Print();*/
     }
 }
 
