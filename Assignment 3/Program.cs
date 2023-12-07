@@ -35,10 +35,11 @@ class SplayTree<T> where T: IComparable<T>
     private Node<T> previousRoot { get; set; }
 
     // Summary: No-args constructor that creates an object of SplayTree class
-    //          and sets root to null
+    //          and sets root and previousRoot to null
     public SplayTree()
     {
-        root = null;
+        this.root = null;
+        this.previousRoot = null;
     }
 
     // Summary: An Access method is a non-recursive method that returns the
@@ -87,6 +88,9 @@ class SplayTree<T> where T: IComparable<T>
             Node<T> grandparent = S.Count > 0 ? S.Pop() : null;
             Node<T> grandgrandparent = S.Count > 0 ? S.Peek() : null;
 
+            // Multiple if statements to ensure the parent or grandparent's
+            //      left and/or right nodes are not null before comparing
+
             // Zig Step: when grandparent is null and parent is not null
             //      means we are at now rotating at the root node
             if (grandparent == null) 
@@ -100,6 +104,7 @@ class SplayTree<T> where T: IComparable<T>
                 else
                     this.root = RotateLeft(parent);
 
+                // If S.Count < 1 then return
                 if (S.Count < 1) return;
             }
             // Zig-Zig Step (Right-Right): when the grandparent and
@@ -147,6 +152,7 @@ class SplayTree<T> where T: IComparable<T>
                         grandgrandparent.Right = RotateRight(parent);
                     }
 
+                    // If S.Count < 1 then return
                     if (S.Count < 1) return;
                 }
             }
@@ -195,6 +201,7 @@ class SplayTree<T> where T: IComparable<T>
                         grandgrandparent.Right = RotateLeft(parent);
                     }
 
+                    // If S.Count < 1 then return
                     if (S.Count < 1) return;
                 }
             }
@@ -230,6 +237,7 @@ class SplayTree<T> where T: IComparable<T>
                         grandgrandparent.Right = RotateLeft(grandparent);
                     }
 
+                    // If S.Count < 1 then return
                     if (S.Count < 1) return;
                 }
 
@@ -260,6 +268,7 @@ class SplayTree<T> where T: IComparable<T>
                         grandgrandparent.Right = RotateRight(grandparent);
                     }
 
+                    // If S.Count < 1 then return
                     if (S.Count < 1) return;
                 }
             }
@@ -305,6 +314,7 @@ class SplayTree<T> where T: IComparable<T>
 
         // Save the current root node for potential undo
         this.previousRoot = root;  
+
         // Get the access path for the item
         Stack<Node<T>> path = Access(item);
 
@@ -400,7 +410,7 @@ class SplayTree<T> where T: IComparable<T>
             Splay(leftMax, path);
 
             // Remove the leftMax's right node since it is the item to be removed
-            //      since leftMax will not have right node, it can easily
+            //      since leftMax(root) will not have right node, it can easily
             //      remove the desired node
             leftMax.Right = leftMax.Right.Right;
         }
@@ -408,6 +418,9 @@ class SplayTree<T> where T: IComparable<T>
         {
             this.root = this.root.Right;
         }
+
+        // Since we are removing, we do not need the previousRoot
+        this.previousRoot = null;
     }
 
     // Summary: Contains method checks if the item is found within the tree
@@ -512,40 +525,119 @@ class SplayTree<T> where T: IComparable<T>
             && EqualsHelper(node1.Right, node2.Right);
     }
 
-    public void Print()
+    // Summary: Undo method restores the tree to its original form before
+    //      the last insertion method
+    public SplayTree<T> Undo()
     {
-        Console.WriteLine("\n\nInorderTraversal: \n\t");
-        InorderTraversal(this.root);
-        Console.WriteLine("\n\nPostorderTraversal: \n\t");
-        PostorderTraversal(this.root);
-        Console.WriteLine("\n\nPreorderTraversal: \n\t");
-        PreorderTraversal(this.root);
+        // If root is null then we do not undo anything
+        if (this.root == null)
+        {
+            return null;
+        }
+
+        // Create an insertedRoot to keep track of the inserted node's
+        //      operations
+        Node<T> insertedRoot = this.root;
+
+        // Create a clone of this tree before we implement
+        SplayTree<T> clonedTree = (SplayTree<T>)this.Clone();
+
+        // Create accesspath for nodes to the left and right of
+        //      the insertedRoot to splay them to the root
+        Stack<Node<T>> path = null;
+
+        // Try rotating the root down to a leaf position
+        if (insertedRoot.Left != null || insertedRoot.Right != null)
+        {
+            // If root has a left child, try a right rotation
+            if (insertedRoot.Left != null)
+            {
+                // Get access path of left item to the insertedRoot
+                //      Store the popped item and splay it to the top
+                path = Access(insertedRoot.Left.Item);
+                Node<T> insertedRootLeft = path.Pop();
+                Splay(insertedRootLeft, path);
+            }
+            // If root has a right child, try a left rotation
+            else if (insertedRoot.Right != null)
+            {
+                // Get access path of right item to the insertedRoot
+                //      Store the popped item and splay it to the top
+                path = Access(insertedRoot.Right.Item);
+                Node<T> insertedRootRight = path.Pop();
+                Splay(insertedRootRight, path);
+            }
+
+            // Check if the insertedRoot becomes a leaf, then remove it
+            if (insertedRoot.Left == null && insertedRoot.Right == null)
+            {
+                // Find the access path for the insertedRoot and pop the 
+                //      first item since we do not need the 
+                path = Access(insertedRoot.Item);
+                path.Pop();
+            }
+            else
+            {
+                // If unsuccessful, reset the tree using the clone and try the other rotation
+                this.root = clonedTree.root;
+            }
+        }
+
+        return this;
     }
 
+    // Summary: Print class is used to print out the Inorder, Preorder
+    //      and Postorder for the splay tree
+    public void Print()
+    {
+        Console.Write("\nInorderTraversal: ");
+        InorderTraversal(this.root);
+        Console.Write("\nPreorderTraversal: ");
+        PreorderTraversal(this.root);
+        Console.Write("\nPostorderTraversal: ");
+        PostorderTraversal(this.root);
+        
+    }
+
+    // Summary: IndorderTraversal is a recursive function that gives
+    //      inorder items in the tree
     public void InorderTraversal(Node<T> node)
     {
+        // If the node is not null then do the recursive calls
         if (node != null)
         {
+            // Steps: Move left until null, print node, move
+            //      right until null (recursive)
             InorderTraversal(node.Left);
             Console.Write(node.Item + " ");
             InorderTraversal(node.Right);
         }
     }
 
+    // Summary: PostorderTraversal is a recursive function that gives
+    //      postorder items in the tree
     public void PostorderTraversal(Node<T> node)
     {
+        // If the node is not null then do the recursive calls
         if (node != null)
         {
+            // Steps: Move left until null, move right until null,
+            //      print item (recursive)
             PostorderTraversal(node.Left);
             PostorderTraversal(node.Right);
             Console.Write(node.Item + " ");
         }
     }
 
+    // Summary: PreorderTraversal is a recursive function that gives
+    //      preorder items in the tree
     public void PreorderTraversal(Node<T> node)
     {
+        // If the node is not null then do the recursive calls
         if (node != null)
         {
+            // Steps: Print item, Move left until null,
+            //      move right until null (recursive)
             Console.Write(node.Item + " ");
             PreorderTraversal(node.Left);
             PreorderTraversal(node.Right);
@@ -570,18 +662,6 @@ class Program
         tree.Insert(-2);
 
         tree.Print();
-
-        //Object clone = tree.Clone();
-
-        //Console.WriteLine(tree.Equals(clone));
-
-        //Console.WriteLine("Contains -2?: " + tree.Contains(5));
-
-        //tree.Print();
-
-        /*tree.Remove(1);
-
-        tree.Print();*/
 
     }
 }
