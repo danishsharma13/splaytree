@@ -418,9 +418,6 @@ class SplayTree<T> where T: IComparable<T>
         {
             this.root = this.root.Right;
         }
-
-        // Since we are removing, we do not need the previousRoot
-        this.previousRoot = null;
     }
 
     // Summary: Contains method checks if the item is found within the tree
@@ -529,8 +526,8 @@ class SplayTree<T> where T: IComparable<T>
     //      the last insertion method
     public SplayTree<T> Undo()
     {
-        // If root is null then we do not undo anything
-        if (this.root == null)
+        // If previousRoot is null then return null
+        if (this.previousRoot == null)
         {
             return null;
         }
@@ -546,43 +543,74 @@ class SplayTree<T> where T: IComparable<T>
         //      the insertedRoot to splay them to the root
         Stack<Node<T>> path = null;
 
-        // Try rotating the root down to a leaf position
-        if (insertedRoot.Left != null || insertedRoot.Right != null)
-        {
-            // If root has a left child, try a right rotation
-            if (insertedRoot.Left != null)
-            {
-                // Get access path of left item to the insertedRoot
-                //      Store the popped item and splay it to the top
-                path = Access(insertedRoot.Left.Item);
-                Node<T> insertedRootLeft = path.Pop();
-                Splay(insertedRootLeft, path);
-            }
-            // If root has a right child, try a left rotation
-            else if (insertedRoot.Right != null)
-            {
-                // Get access path of right item to the insertedRoot
-                //      Store the popped item and splay it to the top
-                path = Access(insertedRoot.Right.Item);
-                Node<T> insertedRootRight = path.Pop();
-                Splay(insertedRootRight, path);
-            }
+        // First splay the previousRoot to the root using Access path,
+        //      store the popped element and then splay
+        path = Access(previousRoot.Item);
+        Node<T> temp = path.Pop();
+        Splay(temp, path);
 
-            // Check if the insertedRoot becomes a leaf, then remove it
-            if (insertedRoot.Left == null && insertedRoot.Right == null)
+        // While insertedRoot.Left and insertedRoot.Right is not null, we need
+        //      keep looping until we rotate the root node to the leaf node
+        while (insertedRoot.Left != null || insertedRoot.Right != null)
+        {
+            // Multiple if statements that will rotate the insertedRoot to the
+            //      leaf node using zig-zag methods
+
+            // Zig-Zig (Left-Left): If the insertedRoot left and left left
+            //      is not null then we can try right rotations
+            if (insertedRoot.Left != null && insertedRoot.Left.Left != null)
             {
-                // Find the access path for the insertedRoot and pop the 
-                //      first item since we do not need the 
-                path = Access(insertedRoot.Item);
-                path.Pop();
+                Node<T> parent = RotateRight(insertedRoot);
+                RotateRight(parent);
             }
-            else
+            // Zig-Zig (Right-Right): If the insertedRoot right and right right
+            //      is not null then we can try left rotations
+            else if (insertedRoot.Right != null && insertedRoot.Right.Right != null)
             {
-                // If unsuccessful, reset the tree using the clone and try the other rotation
-                this.root = clonedTree.root;
+                Node<T> parent = RotateLeft(insertedRoot);
+                RotateLeft(parent);
+            }
+            // Zig-Zag (Left-Right): If the insertedRoot left and left right
+            //      is not null then we can try left-right rotations
+            else if (insertedRoot.Left != null && insertedRoot.Left.Right != null)
+            {
+                RotateRight(insertedRoot.Left);
+                RotateRight(insertedRoot);
+            }
+            // Zig-Zag (Right-Left): If the insertedRoot right and right left
+            //      is not null then we can try right-left rotations
+            else if (insertedRoot.Right != null && insertedRoot.Right.Left != null)
+            {
+                RotateRight(insertedRoot.Left);
+                RotateRight(insertedRoot);
             }
         }
 
+        // If the insertedRoot is at the leaf, then we can find the access
+        //      path for it, pop the first element(insertedRoot) and then
+        //      store the next pop element that will be the parent of the
+        //      newly inserted element (insertedRoot)
+        if (insertedRoot.Left == null && insertedRoot.Right == null)
+        {
+            path = Access(insertedRoot.Item);
+            path.Pop();
+            temp = path.Pop();
+
+            // If the left side of temp (parent) is not null and parent left item
+            //       is same as insertedRoot then we remove the node
+            // If the right side of temp (parent) is not null and parent right item
+            //       is same as insertedRoot then we remove the node
+            if (temp.Left != null && temp.Left.Item.CompareTo(insertedRoot.Item) == 0)
+            {
+                temp.Left = null;
+            }
+            else if (temp.Right != null && temp.Left.Item.CompareTo(insertedRoot.Item) == 0)
+            {
+                temp.Right = null;
+            }
+        }
+
+        // Return splay tree
         return this;
     }
 
@@ -652,7 +680,7 @@ class Program
     {
         SplayTree<int> tree = new SplayTree<int>();
 
-        tree.Insert(1);
+        /*tree.Insert(1);
         tree.Insert(2);
         tree.Insert(3);
         tree.Insert(5);
@@ -660,6 +688,19 @@ class Program
         tree.Insert(6);
         tree.Insert(-7);
         tree.Insert(-2);
+
+        tree.Print();*/
+
+        tree.Insert(70);
+        tree.Insert(50);
+        tree.Insert(60);
+        tree.Insert(10);
+
+        tree.Print();
+
+        tree.Undo();
+
+        tree.Insert(10);
 
         tree.Print();
 
