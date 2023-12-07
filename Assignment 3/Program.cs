@@ -418,9 +418,20 @@ class SplayTree<T> where T: IComparable<T>
         //      item we are looking for or not
         Stack<Node<T>> path = Access(item);
         // If path count is greater than 0 and the item at the top of
-        //      stack is same as item we are looking for then return true
+        //      stack is same as item we are looking for then splay
+        //      and return true
         // If not then return false
-        return (path.Count > 0 && item.CompareTo(path.Peek().Item) == 0);
+        if (path.Count > 0 && item.CompareTo(path.Peek().Item) == 0)
+        {
+            // Pop the first item as it is the item we are searching for
+            //      and store it as a temp
+            // Then splay the item to the top
+            Node<T> temp = path.Pop();
+            Splay(temp, path);
+
+            return true;
+        }
+        return false;
     }
 
     // Summary: Clone method will create a deep copy of the current splay tree
@@ -507,7 +518,6 @@ class SplayTree<T> where T: IComparable<T>
         InorderTraversal(this.root);
         Console.WriteLine("\n\nPostorderTraversal: \n\t");
         PostorderTraversal(this.root);
-
         Console.WriteLine("\n\nPreorderTraversal: \n\t");
         PreorderTraversal(this.root);
     }
@@ -561,9 +571,13 @@ class Program
 
         tree.Print();
 
-        Object clone = tree.Clone();
+        //Object clone = tree.Clone();
 
-        Console.WriteLine(tree.Equals(clone));
+        //Console.WriteLine(tree.Equals(clone));
+
+        //Console.WriteLine("Contains -2?: " + tree.Contains(5));
+
+        //tree.Print();
 
         /*tree.Remove(1);
 
