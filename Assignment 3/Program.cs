@@ -496,9 +496,9 @@ class SplayTree<T> where T: IComparable<T>
         // Return true if node1 equals node 2 AND
         //      recursive call Equals for node1.Left and node2.Left AND
         //      recursive call Equals for node1.Right and node2.Right
-        return node1.Item.Equals(node2.Item) 
-            && Equals(node1.Left, node2.Left) 
-            && Equals(node1.Right, node2.Right);
+        return node1.Item.CompareTo(node2.Item) == 0
+            && EqualsHelper(node1.Left, node2.Left) 
+            && EqualsHelper(node1.Right, node2.Right);
     }
 
     public void Print()
@@ -561,9 +561,13 @@ class Program
 
         tree.Print();
 
-        tree.Remove(1);
+        Object clone = tree.Clone();
 
-        tree.Print();
+        Console.WriteLine(tree.Equals(clone));
+
+        /*tree.Remove(1);
+
+        tree.Print();*/
 
     }
 }
