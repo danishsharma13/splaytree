@@ -614,7 +614,7 @@ class SplayTree<T> where T: IComparable<T>
             {
                 temp.Left = null;
             }
-            else if (temp.Right != null && temp.Left.Item.CompareTo(insertedRoot.Item) == 0)
+            else if (temp.Right != null && temp.Right.Item.CompareTo(insertedRoot.Item) == 0)
             {
                 temp.Right = null;
             }
@@ -692,25 +692,46 @@ class Program
     {
         SplayTree<int> tree = new SplayTree<int>();
 
-        Console.WriteLine("INSERTING 10, 20, 5, 30, 40, 50");
+        Console.WriteLine("INSERTING 5, 10, 70, 60, 55, 50, 2, 1");
+
+        tree.Insert(5);
+        Console.WriteLine("\nInserted 5: ");
+        tree.Print();
+        Console.WriteLine();
 
         tree.Insert(10);
-        tree.Insert(20);
-        tree.Insert(5);
-        tree.Insert(30);
-        tree.Insert(40);
-        tree.Insert(50);
-
+        Console.WriteLine("\nInserted 10: ");
         tree.Print();
+        Console.WriteLine();
 
-        Console.WriteLine("\n\nUNDO 50 AND THEN RE-INSERTING 50 BACK IN, RESULT: ");
+        tree.Insert(70);
+        Console.WriteLine("\nInserted 70: ");
+        tree.Print();
+        Console.WriteLine();
 
-        tree.Undo();
+        tree.Insert(60);
+        Console.WriteLine("\nInserted 60: ");
+        tree.Print();
+        Console.WriteLine();
+
+        tree.Insert(55);
+        Console.WriteLine("\nInserted 55: ");
+        tree.Print();
+        Console.WriteLine();
 
         tree.Insert(50);
-
+        Console.WriteLine("\nInserted 50: ");
         tree.Print();
+        Console.WriteLine();
 
+        tree.Insert(2);
+        Console.WriteLine("\nInserted 2: ");
+        tree.Print();
+        Console.WriteLine();
+
+        tree.Insert(1);
+        Console.WriteLine("\nInserted 1: ");
+        tree.Print();
         Console.WriteLine();
 
     }
