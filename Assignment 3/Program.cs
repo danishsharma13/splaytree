@@ -56,6 +56,8 @@ class SplayTree<T> where T: IComparable<T>
         while (current != null)
         {
             // Adding nodes into the stack
+            // NOTE: This while also inserts the "item" node in the stack
+            //      Need to pop the stack to get parent's information
             path.Push(current);
 
             // Compare the Items to check if we found out item or we 
@@ -104,7 +106,10 @@ class SplayTree<T> where T: IComparable<T>
                 else
                     this.root = RotateLeft(parent);
 
-                // If S.Count < 1 then return
+                // If S.Count < 1 then return, also returning it
+                //      because we do not want to hit any other if
+                //      statements if we are done rotating
+                //      (same logic for other if statements)
                 if (S.Count < 1) return;
             }
             // Zig-Zig Step (Right-Right): when the grandparent and
@@ -124,11 +129,11 @@ class SplayTree<T> where T: IComparable<T>
                     {
                         this.root = RotateRight(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
+                    else if (grandgrandparent.Left != null && grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
                     {
                         grandgrandparent.Left = RotateRight(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
+                    else if (grandgrandparent.Right != null && grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
                     {
                         grandgrandparent.Right = RotateRight(grandparent);
                     }
@@ -143,11 +148,11 @@ class SplayTree<T> where T: IComparable<T>
                     {
                         this.root = RotateRight(parent);
                     }
-                    else if (parent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
+                    else if (grandgrandparent.Left != null && parent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
                     {
                         grandgrandparent.Left = RotateRight(parent);
                     }
-                    else if (parent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
+                    else if (grandgrandparent.Right != null && parent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
                     {
                         grandgrandparent.Right = RotateRight(parent);
                     }
@@ -173,11 +178,11 @@ class SplayTree<T> where T: IComparable<T>
                     {
                         this.root = RotateLeft(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
+                    else if (grandgrandparent.Left != null && grandparent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
                     {
                         grandgrandparent.Left = RotateLeft(grandparent);
                     }
-                    else if (grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
+                    else if (grandgrandparent.Right != null && grandparent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
                     {
                         grandgrandparent.Right = RotateLeft(grandparent);
                     }
@@ -192,11 +197,11 @@ class SplayTree<T> where T: IComparable<T>
                     {
                         this.root = RotateLeft(parent);
                     }
-                    else if (parent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
+                    else if (grandgrandparent.Left != null && parent.Item.CompareTo(grandgrandparent.Left.Item) == 0)
                     {
                         grandgrandparent.Left = RotateLeft(parent);
                     }
-                    else if (parent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
+                    else if (grandgrandparent.Right != null && parent.Item.CompareTo(grandgrandparent.Right.Item) == 0)
                     {
                         grandgrandparent.Right = RotateLeft(parent);
                     }
@@ -279,6 +284,8 @@ class SplayTree<T> where T: IComparable<T>
     //      which rotates the tree to left and re-adjusts the child nodes
     private Node<T> RotateLeft(Node<T> node)
     {
+        // These steps will left rotate the "parent node" with it's child node
+        //      and return the rotated child node
         Node<T> right = node.Right;
         node.Right = right.Left;
         right.Left = node;
@@ -290,6 +297,8 @@ class SplayTree<T> where T: IComparable<T>
     //      which rotates the tree to right and re-adjusts the child nodes
     private Node<T> RotateRight(Node<T> node)
     {
+        // These steps will right rotate the "parent node" with it's child node
+        //      and return the rotated child node
         Node<T> left = node.Left;
         node.Left = left.Right;
         left.Right = node;
@@ -307,8 +316,9 @@ class SplayTree<T> where T: IComparable<T>
         // If the root is null, then we simply insert the item in the tree
         if (root == null)
         {
-            root = newNode;
-            previousRoot = null;
+            // Set root to be newNode, previousRoot to be null and return
+            this.root = newNode;
+            this.previousRoot = null;
             return;
         }
 
@@ -674,35 +684,34 @@ class SplayTree<T> where T: IComparable<T>
 
 }
 
+// Summary: Program class that will create the SplayTree and test
+//      methods that were implemented by our team
 class Program
 {
     public static void Main(string[] args)
     {
         SplayTree<int> tree = new SplayTree<int>();
 
-        /*tree.Insert(1);
-        tree.Insert(2);
-        tree.Insert(3);
-        tree.Insert(5);
-        tree.Insert(4);
-        tree.Insert(6);
-        tree.Insert(-7);
-        tree.Insert(-2);
+        Console.WriteLine("INSERTING 10, 20, 5, 30, 40, 50");
 
-        tree.Print();*/
-
-        tree.Insert(70);
-        tree.Insert(50);
-        tree.Insert(60);
         tree.Insert(10);
+        tree.Insert(20);
+        tree.Insert(5);
+        tree.Insert(30);
+        tree.Insert(40);
+        tree.Insert(50);
 
         tree.Print();
+
+        Console.WriteLine("\n\nUNDO 50 AND THEN RE-INSERTING 50 BACK IN, RESULT: ");
 
         tree.Undo();
 
-        tree.Insert(10);
+        tree.Insert(50);
 
         tree.Print();
+
+        Console.WriteLine();
 
     }
 }
