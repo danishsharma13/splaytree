@@ -45,8 +45,6 @@ class SplayTree<T> where T: IComparable<T>
     //          access path of the nodes from root to sthe last node accessed 
     private Stack<Node<T>> Access(T item)
     {
-        Console.WriteLine("\n\nACCESS PATH: ");
-
         // Create a new stack to store the nodes in the access path
         // Create a new node that traverses through the tree
         Stack<Node<T>> path = new Stack<Node<T>>();
@@ -58,7 +56,7 @@ class SplayTree<T> where T: IComparable<T>
         {
             // Adding nodes into the stack
             path.Push(current);
-            Console.WriteLine(current.Item);
+
             // Compare the Items to check if we found out item or we 
             //      need to traverse deeper in the tree
             int compareItems = item.CompareTo(current.Item);
@@ -329,8 +327,6 @@ class SplayTree<T> where T: IComparable<T>
         // Lastly Splay the newNode to the top using the access path
         //      This will get the newNode to the root
         Splay(newNode, path);
-
-        Console.WriteLine("\n\nROOT AFTER INSERT: " + root.Item);
     }
 
     // Summary: Remove method will splay the item to the root, then
@@ -380,7 +376,6 @@ class SplayTree<T> where T: IComparable<T>
             if (current.Right == null)
             {
                 leftMax = current;
-                Console.WriteLine("LeftMax: " + leftMax.Item);
                 break;
             }
 
@@ -403,8 +398,6 @@ class SplayTree<T> where T: IComparable<T>
 
             // Get the leftMax node to the root
             Splay(leftMax, path);
-
-            Print();
 
             // Remove the leftMax's right node since it is the item to be removed
             //      since leftMax will not have right node, it can easily
@@ -570,7 +563,7 @@ class Program
 
         tree.Remove(1);
 
-        //tree.Print();
+        tree.Print();
 
     }
 }
